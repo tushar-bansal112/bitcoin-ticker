@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 const List<String> currenciesList = [
   'AUD',
   'BRL',
@@ -27,5 +30,24 @@ const List<String> cryptoList = [
   'ETH',
   'LTC',
 ];
+const apikey = '415D1637-A833-4A35-97E1-9C0F614BFB57';
 
-class CoinData {}
+class CoinData {
+  Future getCoinData(String selectedCurrency) async {
+    Map<String, String> cryptoPrices = {};
+    for (String crypto in cryptoList) {
+      String requestURL =
+          'https://rest.coinapi.io/v1/exchangerate/$crypto/$selectedCurrency?apikey=$apikey';
+      http.Response response = await http.get(requestURL);
+      if (response.statusCode == 200) {
+        var decodedData = jsonDecode(response.body);
+        double price = decodedData['rate'];
+        cryptoPrices[crypto] = price.toStringAsFixed(0);
+      } else {
+        print(response.statusCode);
+        throw 'Problem with the get request';
+      }
+    }
+    return cryptoPrices;
+  }
+}
